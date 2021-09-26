@@ -22,6 +22,7 @@
 #include "graphics.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
+#include "constants/species.h"
 
 #define VERSION_BANNER_RIGHT_TILEOFFSET 64
 #define VERSION_BANNER_LEFT_X 98
@@ -60,6 +61,8 @@ static const u16 sUnusedUnknownPal[] = INCBIN_U16("graphics/title_screen/unk_853
 static const u32 sTitleScreenRayquazaGfx[] = INCBIN_U32("graphics/title_screen/rayquaza.4bpp.lz");
 static const u32 sTitleScreenRayquazaTilemap[] = INCBIN_U32("graphics/title_screen/rayquaza.bin.lz");
 static const u32 sTitleScreenLogoShineGfx[] = INCBIN_U32("graphics/title_screen/logo_shine.4bpp.lz");
+const u32 gTest_Mon[] = INCBIN_U32("graphics/pokemon/totodile/anim_front.4bpp.lz");
+const u32 gTestPal_Mon[] = INCBIN_U32("graphics/pokemon/totodile/normal.gbapal.lz");
 //static const u32 sTitleScreenCloudsGfx[] = INCBIN_U32("graphics/title_screen/clouds.4bpp.lz");
 
 
@@ -352,6 +355,61 @@ static const struct CompressedSpriteSheet sPokemonLogoShineSpriteSheet[] =
     {},
 };
 
+static const union AnimCmd smon_Anim1[] =
+{
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(64, 30),
+    ANIMCMD_JUMP(0),
+};
+
+static const union AnimCmd *const smon_AnimTable[] =
+{
+        smon_Anim1,
+};
+
+
+static const struct CompressedSpriteSheet sSpriteSheet_Mon[] =
+{
+    {gTest_Mon, 4096, 777},
+    {NULL},
+};
+
+static const struct CompressedSpritePalette sSpritePal_Mon[] =
+{
+    {gTestPal_Mon, 777},
+    {NULL},
+};
+
+static const struct OamData sMonOamData =
+{
+    .y = 0,
+    .affineMode = 0,
+    .objMode = 0,
+    .mosaic = 0,
+    .bpp = 0,
+    .shape = 0,
+    .x = 0,
+    .matrixNum = 0,
+    .size = 3,
+    .tileNum = 0,
+    .priority = 0,
+    .paletteNum = 0,
+    .affineParam = 0,
+};
+
+static const struct SpriteTemplate sMonSpriteTemplate =
+
+{
+    .tileTag = 777,
+    .paletteTag = 777,
+    .oam = &sMonOamData,
+    .anims = smon_AnimTable,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = SpriteCallbackDummy,
+};
+
+
 // code
 static void SpriteCB_VersionBannerLeft(struct Sprite *sprite)
 {
@@ -568,6 +626,8 @@ void CB2_InitTitleScreen(void)
         LoadCompressedSpriteSheet(&sPokemonLogoShineSpriteSheet[0]);
         LoadPalette(gTitleScreenEmeraldVersionPal, 0x100, 0x20);
         LoadSpritePalette(&sSpritePalette_PressStart[0]);
+        LoadCompressedSpriteSheet(sSpriteSheet_Mon);
+        LoadCompressedSpritePalette(sSpritePal_Mon);
         gMain.state = 2;
         break;
     case 2:
@@ -611,7 +671,7 @@ void CB2_InitTitleScreen(void)
                                     | DISPCNT_OBJ_ON
                                     | DISPCNT_WIN0_ON
                                     | DISPCNT_OBJWIN_ON);
-        m4aSongNumStart(MUS_TITLE);
+        m4aSongNumStart(MUS_HELP);
         gMain.state = 5;
         break;
     case 5:
@@ -706,8 +766,9 @@ static void Task_TitleScreenPhase2(u8 taskId)
                                     | DISPCNT_BG1_ON
                                     | DISPCNT_BG2_ON
                                     | DISPCNT_OBJ_ON);
-        CreatePressStartBanner(START_BANNER_X, 108);
-        CreateCopyrightBanner(START_BANNER_X, 148);
+        CreatePressStartBanner(START_BANNER_X, 148);
+        //CreateCopyrightBanner(START_BANNER_X, 148);
+        CreateSprite(&sMonSpriteTemplate, 125, 110, 0);
         gTasks[taskId].data[4] = 0;
         gTasks[taskId].func = Task_TitleScreenPhase3;
     }
@@ -731,6 +792,7 @@ static void Task_TitleScreenPhase3(u8 taskId)
 {
     if ((JOY_NEW(A_BUTTON)) || (JOY_NEW(START_BUTTON)))
     {
+        PlayCryInternal(SPECIES_TOTODILE, 0, 120, 10, 0);
         FadeOutBGM(4);
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 0x10, RGB_WHITEALPHA);
         SetMainCallback2(CB2_GoToMainMenu);
