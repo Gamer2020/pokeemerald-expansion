@@ -2,4 +2,4 @@
 
 Video: https://youtu.be/ZLtHw-XMBOc
 
-![Screenshot](screen.png)
+![Screenshot](Screen.gif)
