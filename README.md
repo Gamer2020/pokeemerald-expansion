@@ -3,4 +3,4 @@
 Video: TBD
 Tutorial: https://github.com/pret/pokeemerald/wiki/Add-a-debug-menu
 
-![Screenshot](Screen.gif)
+![Screenshot](screen.gif)
